@@ -1,0 +1,67 @@
+Draft Version 0.04
+==================
+
+This is just a proof of concept to demonstrate an alternative
+system for doing Computer Aided Design (CAD) centering on a truly
+open file format.
+
+Some basic drawing elements and a viewer have been implemented.
+
+BUGS
+
+ - Probably
+
+TODO
+
+ - None, otherwise this will become Yet Another Half-Finished CAD
+   Program.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This package depends on perl and the following CPAN modules:
+
+   Tk
+   Tk::WorldCanvas
+   Test::Helper
+   SGI::FAM
+   YAML
+
+USAGE
+
+Make sure that FAM is running; on my machine I need to do this:
+
+   service portmap start
+   service xinetd start
+
+   (or manually start FAM: `/usr/bin/fam -T 0 &`)
+
+Try and open some of the example drawings:
+
+   tkdraft.pl t/data/arrows.drawing/ &
+   tkdraft.pl t/data/arrow.drawing/ &
+   tkdraft.pl t/data/crowd.drawing/ &
+   tkdraft.pl t/data/people/ &
+   tkdraft.pl t/data/fridge.drawing/ &
+
+Zoom in and out with the 'i' and 'o' keys, pan the viewport with the
+middle mouse-button and move items around with the left
+mouse-button.
+
+Note that whenever you move something, the change is immediately
+committed to disk.  Any changes to one viewport are immediately
+reflected in other viewports showing the same items.
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2003-2004 Bruno Postle <bruno@postle.net> All Rights
+Reserved.  This module is Free Software. It may be used,
+redistributed and/or modified under the same terms as Perl itself.
