@@ -1,5 +1,8 @@
 Revision history for Draft.
 
+0.06  Thu Oct 07 10:00:00 2004
+      - system ('sync'), fixes bugginess revealed by Undo and Redo
+
 0.05  Tue Oct  5 11:58:00 2004
       - Added journaling, undo and redo functionality
       - Depends on diff and patch

@@ -194,6 +194,7 @@ sub _items_end_drag
     my $item = $Draft::WORLD->{$folder}->{$tag};
 
     $item->Move ([$moveX, $moveY, 0]);
+    system 'sync';
 }
 
 sub _items_enter

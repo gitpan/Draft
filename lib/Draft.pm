@@ -30,7 +30,7 @@ use strict;
 use warnings;
 use Draft::Drawing;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 our $WORLD = undef;
 our $PATH = undef;
 

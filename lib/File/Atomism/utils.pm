@@ -170,9 +170,9 @@ sub PermFilename
 
 =pod
 
-Write to the undo buffer like so
+Write to the undo buffer like so:
 
-    Journal ([['oldfile1.yml', '.newfile1.yml'], [ ... ] ]);
+    Journal ([['persistent-file1.yml', '.temp-file1.yml'], [ ... ] ]);
 
 =cut
 
@@ -196,7 +196,17 @@ sub Journal
 
         `diff -u $old $new >> $journal;`;
     }
+    system 'sync';
 }
+
+=pod
+
+Undo the most recent change to the journal by supplying a directory
+path to the Undo() method:
+
+    Undo ('/path/to');
+
+=cut
 
 sub Undo
 {
@@ -214,9 +224,19 @@ sub Undo
 
     `cd $dir; patch -p0 --batch --no-backup < $undo; cd -`;
     rename $undo, $redo;
+    system 'sync';
 
     closedir (DIR);
 }
+
+=pod
+
+Undo the most recent undo() with the Redo() method.  Usage is the
+same as for Undo():
+
+    Redo ('/path/to');
+
+=cut
 
 sub Redo
 {
@@ -234,6 +254,7 @@ sub Redo
 
     `cd $dir; patch -p0 --force --no-backup < $redo; cd -`;
     rename $redo, $undo;
+    system 'sync';
 
     closedir (DIR);
 }
