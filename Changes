@@ -1,5 +1,9 @@
 Revision history for Draft.
 
+0.05  Tue Oct  5 11:58:00 2004
+      - Added journaling, undo and redo functionality
+      - Depends on diff and patch
+
 0.04  Tue Sep 28 10:28:00 2004
       - moved lots of files around and split off File::Atomism
       - Changed original file format extension (not backward compatible)

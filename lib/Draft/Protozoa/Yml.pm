@@ -17,7 +17,7 @@ use strict;
 use warnings;
 
 use YAML;
-use File::Atomism::utils qw /TempFilename/;
+use File::Atomism::utils qw /TempFilename Journal/;
 
 =pod
 
@@ -94,6 +94,8 @@ sub Move
 
     my $temp = TempFilename ($self->{_path});
     YAML::DumpFile ($temp, $data);
+
+    Journal ([[$self->{_path}, $temp]]);
     rename $temp, $self->{_path};
 }
 

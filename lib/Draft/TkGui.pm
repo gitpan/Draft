@@ -30,6 +30,7 @@ all L<Tk::Canvas> methods.
 use Draft;
 use Tk::WorldCanvas;
 use File::Atomism;
+use File::Atomism::utils qw /Undo Redo/;
 
 use vars qw /@ISA/;
 @ISA = qw /Tk::WorldCanvas/;
@@ -83,6 +84,9 @@ sub new
 
     $self->CanvasBind('<i>' => sub {$self->zoom (1.25)});
     $self->CanvasBind('<o>' => sub {$self->zoom (0.8)});
+
+    $self->CanvasBind ('<Control-Key-z>' => sub {Undo ($Draft::WORLD->{$Draft::PATH}->{_path}); $_[0]->Draw});
+    $self->CanvasBind ('<Control-Key-y>' => sub {Redo ($Draft::WORLD->{$Draft::PATH}->{_path}); $_[0]->Draw});
 
     #$self->CanvasBind ('MouseWheel' => sub {$self->zoom (1.25)});
 

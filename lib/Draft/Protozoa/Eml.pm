@@ -21,7 +21,7 @@ probably doing something wrong.
 use strict;
 use warnings;
 
-use File::Atomism::utils qw /TempFilename/;
+use File::Atomism::utils qw /TempFilename Journal/;
 
 =pod
 
@@ -149,6 +149,7 @@ sub Move
 
     close FILE || return;
 
+    Journal ([[$self->{_path}, $temp]]);
     rename $temp, $self->{_path};
 }
 

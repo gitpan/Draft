@@ -21,12 +21,17 @@ use warnings;
 
 use File::stat;
 use File::Spec;
-use Sys::Hostname;
 use Exporter;
+use File::Path qw /mkpath/;
+use Sys::Hostname qw /hostname/;
+use Time::HiRes qw /gettimeofday/;
+use Cwd qw /abs_path/;
+
+our $CONFDIR = $ENV{ATOMISM_CONF} || $ENV{HOME} ."/.atomism";
 
 use vars qw /@ISA @EXPORT_OK/;
 @ISA = qw /Exporter/;
-@EXPORT_OK = qw /Hostname Pid Inode Unixdate Dir File Extension TempFilename PermFilename/;
+@EXPORT_OK = qw /Hostname Pid Inode Unixdate Dir File Extension TempFilename PermFilename Journal Undo Redo/;
 
 =pod
 
@@ -42,7 +47,7 @@ Access some values useful for constructing temporary filenames:
 
 sub Hostname
 {
-    eval {Sys::Hostname::hostname} || 'localhost.localdomain';
+    eval {hostname} || 'localhost.localdomain';
 }
 
 sub Pid
@@ -161,6 +166,76 @@ sub PermFilename
     my $ext = shift || Extension ($path);
 
     Dir ($path) . Hostname ."-". Pid ."-". Inode ($path) ."-".  Unixdate .".". $ext;
+}
+
+=pod
+
+Write to the undo buffer like so
+
+    Journal ([['oldfile1.yml', '.newfile1.yml'], [ ... ] ]);
+
+=cut
+
+sub Journal
+{
+    my $list = shift;
+
+    # figure out where to put the journal from the first pair of files
+    my $dir = Dir (abs_path ($list->[0]->[0])) || Dir (abs_path ($list->[0]->[1]));
+
+    my $undodir = $CONFDIR ."/UNDO". $dir;
+    my $redodir = $CONFDIR ."/REDO". $dir;
+    mkpath ([$undodir, $redodir]);
+
+    my $journal = $undodir . join (".", gettimeofday) .".patch";
+
+    for my $item (@{$list})
+    {
+        my $old = abs_path ($item->[0]) || '/dev/null';
+        my $new = abs_path ($item->[1]) || '/dev/null';
+
+        `diff -u $old $new >> $journal;`;
+    }
+}
+
+sub Undo
+{
+    my $dir = abs_path (shift);
+    my $undodir = $CONFDIR ."/UNDO". $dir;
+    my $redodir = $CONFDIR ."/REDO". $dir;
+
+    opendir (DIR, $undodir) or warn "$!";
+    my @files = sort (readdir (DIR));
+    @files = grep !/^\./, @files;
+    my $file = pop (@files) || return;
+
+    my $undo = $undodir ."/". $file;
+    my $redo = $redodir ."/". $file;
+
+    `cd $dir; patch -p0 --batch --no-backup < $undo; cd -`;
+    rename $undo, $redo;
+
+    closedir (DIR);
+}
+
+sub Redo
+{
+    my $dir = abs_path (shift);
+    my $undodir = $CONFDIR ."/UNDO". $dir;
+    my $redodir = $CONFDIR ."/REDO". $dir;
+
+    opendir (DIR, $redodir) or warn "$!";
+    my @files = sort (readdir (DIR));
+    @files = grep !/^\./, @files;
+    my $file = shift (@files) || return;
+
+    my $undo = $undodir ."/". $file;
+    my $redo = $redodir ."/". $file;
+
+    `cd $dir; patch -p0 --force --no-backup < $redo; cd -`;
+    rename $redo, $undo;
+
+    closedir (DIR);
 }
 
 1;
